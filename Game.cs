@@ -19,10 +19,8 @@ class Game {
             bool insideBoard = (x >= 1) && (x <= 8) && (y >= 1) && (y <= 8);
             if (Raylib.IsMouseButtonPressed(MouseButton.Left) && insideBoard ) {
                 if (board.selectedPiece == null) {
-                    Console.WriteLine("1");
                     board.select(x,y);
                 } else {
-                    Console.WriteLine("2");
                     board.move(x,y);
                 }
             }

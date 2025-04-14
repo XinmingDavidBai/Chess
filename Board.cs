@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Security.Cryptography.X509Certificates;
 using Chess.Pieces;
 using Raylib_cs;
@@ -9,6 +10,7 @@ public class Board {
     public playerColor turn;
     public IPiece? selectedPiece;
     public (int,int)[] movablePositions;
+    public (int, int)[] takeablePositions;
 
     public Board () {
         selectedPiece=null;
@@ -30,7 +32,7 @@ public class Board {
             }
         } 
         movablePositions = [];
-
+        takeablePositions = [];
     }
     public void draw() {
         for (int i = 0; i < 8; i++) {
@@ -42,17 +44,53 @@ public class Board {
                 }
             }
         }
+        foreach ((int, int) pos in takeablePositions) {
+            (int x, int y) = pos;
+            if (x == 0 && y == 0) break;
+            Raylib.DrawRectangle((x)*Consts.TILE_SIZE, (y)*Consts.TILE_SIZE, Consts.TILE_SIZE,Consts.TILE_SIZE, Color.DarkBlue);
+        }
         foreach (IPiece piece in pieces) {
             if (piece == null) break;
             piece.draw();
         }
-    
+
         foreach ((int, int) pos in movablePositions) {
             (int x, int y) = pos;
-            if (x == 0 && y == 0) return;
+
+            if (x == 0 && y == 0) break;
             Raylib.DrawCircle(x*Consts.TILE_SIZE + Consts.TILE_SIZE / 2, y*Consts.TILE_SIZE + Consts.TILE_SIZE / 2, Consts.TILE_SIZE / 8, Color.DarkGreen);
         }
+
+
+
     }
+    private ((int, int)[], (int, int)[]) findMovableAndTakeablePositions((int,int)[] moves) {
+        (int, int)[] movablePositions = new (int, int)[moves.Length];
+        (int, int)[] takeablePositions = new (int, int)[moves.Length];
+        int m = 0;
+        int t = 0;
+        foreach ((int, int) pos in moves) {
+            bool placed = false;
+            foreach (IPiece piece in pieces) {
+                if (piece == null) {
+                    continue;
+                }
+                if (piece.getPosition() == pos) {
+                    if (piece.pieceColor() != turn) {
+                        takeablePositions[t] = pos;
+                        t++;
+                        placed = true;
+                        break;
+                    } 
+                    
+                }
+            }
+            if (placed) continue;
+            movablePositions[m] = pos;
+            m++;
+        }
+        return (movablePositions, takeablePositions);
+    }  
     public void select(int x, int y) {
         IPiece? selectedPiece = null;
         foreach (IPiece piece in pieces) {
@@ -64,21 +102,17 @@ public class Board {
         }
         if (selectedPiece == null) return;
         if (selectedPiece.pieceColor() != turn) return;
-        if (selectedPiece.getSelect()) {
-            this.selectedPiece = null;
-            movablePositions = [];
-        } else {
-            this.selectedPiece = selectedPiece;
-            movablePositions = selectedPiece.allMoves();
-        }
+
+        this.selectedPiece = selectedPiece;
+        
+        (movablePositions, takeablePositions) = findMovableAndTakeablePositions(selectedPiece.allMoves());    
+
         selectedPiece.setSelect();
     }
     public void move(int x, int y) {
         if (selectedPiece == null) return;
         bool available = false;
         foreach ((int,int) move in movablePositions) {
-            Console.WriteLine(move);
-            Console.WriteLine(x.ToString() + " " + y.ToString());
             if (move == (x,y)) {
                 available = true;
             }
@@ -86,11 +120,20 @@ public class Board {
         if (available) {
             selectedPiece.move(x,y);
             switchTurn();
-        }
-        movablePositions = [];
+            movablePositions = [];
+            takeablePositions = []; 
 
-        selectedPiece.setSelect();
-        selectedPiece = null;
+            selectedPiece.setSelect();
+            selectedPiece = null;
+            return;
+        }
+        bool takeable = false;
+        foreach ((int,int) move in takeablePositions) {
+            if (move == (x,y)) takeable = true;
+        }
+        //TODO: implement take another piece
+
+
     }
     public void switchTurn () {
         switch (turn) {
