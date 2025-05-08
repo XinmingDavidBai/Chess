@@ -119,22 +119,27 @@ public class Board {
         }
         if (available) {
             selectedPiece.move(x,y);
-            switchTurn();
-            movablePositions = [];
-            takeablePositions = []; 
-
+            resetAndSwitch();
             selectedPiece.setSelect();
             selectedPiece = null;
             return;
         }
-        bool takeable = false;
+        IPiece? takeablePiece = null;
         foreach ((int,int) move in takeablePositions) {
-            if (move == (x,y)) takeable = true;
+            if (move == (x,y)) {
+                takeablePiece = Array.Find(pieces, p=>p.getPosition()==(x,y));
+            }
         }
-        //TODO: implement take another piece
-
-
+        if (takeablePiece != null) {
+            selectedPiece.move(x,y);
+            takeablePiece.kill();
+            resetAndSwitch();
+            selectedPiece.setSelect();
+            selectedPiece = null;
+            return;
+        }
     }
+
     public void switchTurn () {
         switch (turn) {
             case playerColor.White:
@@ -144,6 +149,11 @@ public class Board {
                 turn = playerColor.White;
                 break;
         }
+    }
+    private void resetAndSwitch() {
+        switchTurn();
+        movablePositions = [];
+        takeablePositions = []; 
     }
     
 }
