@@ -1,18 +1,14 @@
 namespace Chess.Pieces;
 using Raylib_cs;
 public class Bishop : IPiece  {
-    public playerColor color;
-    public ChessPosition position;
-    public bool alive;
-    public bool selected;
+
     public Image image;
     public Texture2D texture;
-    public Bishop (playerColor color, (char,int) position) {
-        selected=false;
-        alive=true;
-        this.color = color;
+
+    public Bishop (playerColor newColor, (char,int) position) {
+        color = newColor;
         (char x, int y) = position;
-        this.position = new ChessPosition(x,y);
+        Position = new ChessPosition(x,y);
         
         switch (this.color) {
             case playerColor.White:
@@ -26,41 +22,29 @@ public class Bishop : IPiece  {
         texture = Raylib.LoadTextureFromImage(image);  
         Raylib.UnloadImage(image);
     }
-    public void kill () {
-        alive=false;
-    }
+    
+    public bool Alive { get; set; } = true;
+    public bool Select { get; set; } = false;
+
+    public ChessPosition Position { get; set; }
+
+    public playerColor color { get; }
+
     public void draw() {
-        if (alive) {
-            (int posX, int posY) = position.numPos;
-            if (selected) {
+        if (Alive) {
+            (int posX, int posY) = Position.numPos;
+            if (Select) {
                 Raylib.DrawRectangle(posX*Consts.TILE_SIZE, posY*Consts.TILE_SIZE, Consts.TILE_SIZE, Consts.TILE_SIZE, Color.DarkGreen);
             }
             Raylib.DrawTexture(texture, posX *Consts.TILE_SIZE, posY* Consts.TILE_SIZE, Color.White);
 
         } 
     }
-    public void move(int x, int y) {
-        if (!alive) return;
-        position.setNewPos(x,y);
-    }
-
-
-    public playerColor pieceColor() {
-        return color;
-    }
-
-    public void setSelect() {
-        selected = !selected;
-    }
-
-    public bool getSelect() {
-        return selected;
-    }
 
     public (int, int)[] allMoves() {
-        if (!alive) return [];
+        if (!Alive) return [];
         (int, int)[] moves = new (int,int)[64];
-        (int x, int y) = position.numPos;
+        (int x, int y) = Position.numPos;
         (int, int)[] directions = {
                     (-1, -1), (0, -1), (1, -1),
                     (-1,  0),         (1,  0),
@@ -76,9 +60,5 @@ public class Bishop : IPiece  {
             
         }
         return moves;
-    }
-
-    public (int, int) getPosition() {
-        return position.numPos;
     }
 }

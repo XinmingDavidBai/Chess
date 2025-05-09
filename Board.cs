@@ -46,7 +46,6 @@ public class Board {
                         c++;
                         break;
                     default:
-                        // pieces[i][j] = new Empty((ChessPositionTransformer.intToChar(j), i + 1));
                         break;
                 }
             }
@@ -91,21 +90,24 @@ public class Board {
         int t = 0;
         foreach ((int, int) pos in moves) {
             bool placed = false;
+            bool sameColor = false;
             foreach (IPiece piece in pieces) {
-                if (piece == null) {
+                if (piece == null || !piece.Alive) {
                     continue;
                 }
-                if (piece.getPosition() == pos) {
-                    if (piece.pieceColor() != turn) {
+                if (piece.Position.numPos == pos) {
+                    if (piece.color != turn) {
                         takeablePositions[t] = pos;
                         t++;
                         placed = true;
                         break;
-                    } 
-                    
+                    } else {
+                        sameColor = true;
+                        break;
+                    }
                 }
             }
-            if (placed) continue;
+            if (placed || sameColor) continue;
             movablePositions[m] = pos;
             m++;
         }
@@ -115,22 +117,37 @@ public class Board {
         IPiece? selectedPiece = null;
         foreach (IPiece piece in pieces) {
             if (piece == null) continue;
-            if (piece.getPosition() == (x,y)) {
+            if (piece.Position.numPos == (x,y)) {
                 selectedPiece = piece;
                 break;
             }
         }
-        if (selectedPiece == null) return;
-        if (selectedPiece.pieceColor() != turn) return;
+        if (selectedPiece == null || selectedPiece.color != turn) return;
 
         this.selectedPiece = selectedPiece;
         
         (movablePositions, takeablePositions) = findMovableAndTakeablePositions(selectedPiece.allMoves());    
 
-        selectedPiece.setSelect();
+        selectedPiece.Select = !selectedPiece.Select;
+    }
+    private void unSelectPiece() {
+        if (selectedPiece == null) return;
+        selectedPiece.Select = !selectedPiece.Select;
+        selectedPiece = null;
+        movablePositions = [];
+        takeablePositions = []; 
+    }
+    private void resetAndSwitch() {
+        switchTurn();
+        unSelectPiece();
     }
     public void move(int x, int y) {
         if (selectedPiece == null) return;
+
+        if (selectedPiece.Position.numPos==(x,y)) {
+            unSelectPiece();
+            return;
+        }
         bool available = false;
         foreach ((int,int) move in movablePositions) {
             if (move == (x,y)) {
@@ -138,24 +155,20 @@ public class Board {
             }
         }
         if (available) {
-            selectedPiece.move(x,y);
+            Utilities.movePiece(selectedPiece,x,y);
             resetAndSwitch();
-            selectedPiece.setSelect();
-            selectedPiece = null;
             return;
         }
         IPiece? takeablePiece = null;
         foreach ((int,int) move in takeablePositions) {
             if (move == (x,y)) {
-                takeablePiece = Array.Find(pieces, p=>p.getPosition()==(x,y));
+                takeablePiece = Array.Find(pieces, p=>p.Position.numPos==(x,y));
             }
         }
         if (takeablePiece != null) {
-            selectedPiece.move(x,y);
-            takeablePiece.kill();
+            Utilities.movePiece(selectedPiece,x,y);
+            takeablePiece.Alive = false;
             resetAndSwitch();
-            selectedPiece.setSelect();
-            selectedPiece = null;
             return;
         }
     }
@@ -169,11 +182,6 @@ public class Board {
                 turn = playerColor.White;
                 break;
         }
-    }
-    private void resetAndSwitch() {
-        switchTurn();
-        movablePositions = [];
-        takeablePositions = []; 
     }
     
 }

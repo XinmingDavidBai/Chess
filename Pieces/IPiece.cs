@@ -1,13 +1,11 @@
 namespace Chess.Pieces;
 
 public interface IPiece {
-    void move(int x, int y);
-    void draw();
-    void kill();
-    void setSelect();
-    bool getSelect();
-    playerColor pieceColor();
-    (int,int)[] allMoves();
-    (int, int) getPosition();
+    public bool Alive { get; set; }
+    public bool Select { get; set; }
+    public playerColor color { get; }
+    public ChessPosition Position { get; set; }
+    public void draw();
+    public (int,int)[] allMoves();
     
 }
