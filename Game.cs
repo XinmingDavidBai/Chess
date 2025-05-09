@@ -18,7 +18,7 @@ class Game {
             (int x, int y) = ((int)mousePosition.X / Consts.TILE_SIZE, (int)mousePosition.Y / Consts.TILE_SIZE);
             bool insideBoard = (x >= 1) && (x <= 8) && (y >= 1) && (y <= 8);
             if (Raylib.IsMouseButtonPressed(MouseButton.Left) && insideBoard ) {
-                if (board.selectedPiece == null) {
+                if (board.SelectedPiece == null) {
                     board.select(x,y);
                 } else {
                     board.move(x,y);

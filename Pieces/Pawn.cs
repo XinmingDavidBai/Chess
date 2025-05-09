@@ -2,41 +2,43 @@ namespace Chess.Pieces;
 using Raylib_cs;
 public class Pawn : IPiece  {
 
-    public Image image;
-    public Texture2D texture;
+    public Image Image;
+    public Texture2D Texture;
 
     public Pawn (playerColor newColor, (char,int) position) {
-        color = newColor;
+        Color = newColor;
         (char x, int y) = position;
         Position = new ChessPosition(x,y);
-        
-        switch (this.color) {
-            case playerColor.White:
-                image = Raylib.LoadImage("assets/pawn_white.png");
-                break;
-            case playerColor.Black:
-                image = Raylib.LoadImage("assets/pawn_black.png");
-                break;
-        }
-        Raylib.ImageResize(ref image, Consts.TILE_SIZE, Consts.TILE_SIZE);
-        texture = Raylib.LoadTextureFromImage(image);  
-        Raylib.UnloadImage(image);
+
+        Label = this.Color switch
+        {
+            playerColor.White => "pawn_white",
+            playerColor.Black => "pawn_black",
+            _ => Label
+        } ?? throw new InvalidOperationException();
+        Image = Raylib.LoadImage($"assets/{Label}.png");
+        Raylib.ImageResize(ref Image, Consts.TILE_SIZE, Consts.TILE_SIZE);
+        Texture = Raylib.LoadTextureFromImage(Image);  
+        Raylib.UnloadImage(Image);
     }
     
     public bool Alive { get; set; } = true;
     public bool Select { get; set; } = false;
 
+    public PieceType Type { get; } = PieceType.Pawn;
+    public int Value { get; } = 1;
     public ChessPosition Position { get; set; }
 
-    public playerColor color { get; }
+    public playerColor Color { get; }
+    public string Label { get; set; }
 
     public void draw() {
         if (Alive) {
             (int posX, int posY) = Position.numPos;
             if (Select) {
-                Raylib.DrawRectangle(posX*Consts.TILE_SIZE, posY*Consts.TILE_SIZE, Consts.TILE_SIZE, Consts.TILE_SIZE, Color.DarkGreen);
+                Raylib.DrawRectangle(posX*Consts.TILE_SIZE, posY*Consts.TILE_SIZE, Consts.TILE_SIZE, Consts.TILE_SIZE, Raylib_cs.Color.DarkGreen);
             }
-            Raylib.DrawTexture(texture, posX *Consts.TILE_SIZE, posY* Consts.TILE_SIZE, Color.White);
+            Raylib.DrawTexture(Texture, posX *Consts.TILE_SIZE, posY* Consts.TILE_SIZE, Raylib_cs.Color.White);
 
         } 
     }

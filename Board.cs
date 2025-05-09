@@ -6,43 +6,44 @@ using Raylib_cs;
 namespace Chess;
 
 public class Board {
-    public IPiece[] pieces;
-    public playerColor turn;
-    public IPiece? selectedPiece;
-    public (int,int)[] movablePositions;
-    public (int, int)[] takeablePositions;
+    private IPiece[] _pieces;
+    private playerColor _turn;
+    public IPiece? SelectedPiece;
+    private List<((int,int),IPiece?)>  _possibleMoves;
 
-    public Board () {
-        selectedPiece=null;
-        turn = playerColor.White;
-        pieces = new IPiece[32];
+    public Board ()
+    {
+        _possibleMoves = new List<((int, int), IPiece?)>();
+        SelectedPiece=null;
+        _turn = playerColor.White;
+        _pieces = new IPiece[32];
         int c = 0;
         for (int i = 0; i < Consts.INITIAL_PIECES_LOCATION.Length; i++) {
             for (int j = 0; j < Consts.INITIAL_PIECES_LOCATION[i].Length; j++) {
                 playerColor col = i < 3 ? playerColor.Black : playerColor.White;
                 switch (Consts.INITIAL_PIECES_LOCATION[i][j]) {
                     case 'k':
-                        pieces[c] = new King(col, (ChessPositionTransformer.intToChar(j), i + 1));
+                        _pieces[c] = new King(col, (ChessPositionTransformer.intToChar(j), i + 1));
                         c++;
                         break;
                     case 'q':
-                        pieces[c] = new Queen(col, (ChessPositionTransformer.intToChar(j), i + 1));
+                        _pieces[c] = new Queen(col, (ChessPositionTransformer.intToChar(j), i + 1));
                         c++;
                         break;
                     case 'b':
-                        pieces[c] = new Bishop(col, (ChessPositionTransformer.intToChar(j), i + 1));
+                        _pieces[c] = new Bishop(col, (ChessPositionTransformer.intToChar(j), i + 1));
                         c++;
                         break;
                     case 'r':
-                        pieces[c] = new Rook(col, (ChessPositionTransformer.intToChar(j), i + 1));
+                        _pieces[c] = new Rook(col, (ChessPositionTransformer.intToChar(j), i + 1));
                         c++;
                         break;
                     case 'p':
-                        pieces[c] = new Pawn(col, (ChessPositionTransformer.intToChar(j), i + 1));
+                        _pieces[c] = new Pawn(col, (ChessPositionTransformer.intToChar(j), i + 1));
                         c++;
                         break;
                     case 'n':
-                        pieces[c] = new Knight(col, (ChessPositionTransformer.intToChar(j), i + 1));
+                        _pieces[c] = new Knight(col, (ChessPositionTransformer.intToChar(j), i + 1));
                         c++;
                         break;
                     default:
@@ -50,8 +51,6 @@ public class Board {
                 }
             }
         } 
-        movablePositions = [];
-        takeablePositions = [];
     }
     public void draw() {
         for (int i = 0; i < 8; i++) {
@@ -63,125 +62,124 @@ public class Board {
                 }
             }
         }
-        foreach ((int, int) pos in takeablePositions) {
-            (int x, int y) = pos;
+
+        foreach (((int, int), IPiece?) move in _possibleMoves)
+        {
+            ((int x, int y), IPiece? piece) = move;
             if (x == 0 && y == 0) break;
-            Raylib.DrawRectangle((x)*Consts.TILE_SIZE, (y)*Consts.TILE_SIZE, Consts.TILE_SIZE,Consts.TILE_SIZE, Color.DarkBlue);
+            if (piece == null)
+            {
+                Raylib.DrawCircle(x * Consts.TILE_SIZE + Consts.TILE_SIZE / 2,
+                    y * Consts.TILE_SIZE + Consts.TILE_SIZE / 2,
+                    Consts.TILE_SIZE / 8, Color.DarkGreen);
+            }
+            else
+            {
+                Raylib.DrawRectangle((x) * Consts.TILE_SIZE, (y) * Consts.TILE_SIZE, Consts.TILE_SIZE, Consts.TILE_SIZE,
+                    Color.DarkBlue);
+            }
         }
-        foreach (IPiece piece in pieces) {
-            if (piece == null) break;
+        foreach (IPiece piece in _pieces) {
+            if (!piece.Alive) continue;
             piece.draw();
         }
-
-        foreach ((int, int) pos in movablePositions) {
-            (int x, int y) = pos;
-
-            if (x == 0 && y == 0) break;
-            Raylib.DrawCircle(x*Consts.TILE_SIZE + Consts.TILE_SIZE / 2, y*Consts.TILE_SIZE + Consts.TILE_SIZE / 2, Consts.TILE_SIZE / 8, Color.DarkGreen);
-        }
-
-
+        
 
     }
-    private ((int, int)[], (int, int)[]) findMovableAndTakeablePositions((int,int)[] moves) {
-        (int, int)[] movablePositions = new (int, int)[moves.Length];
-        (int, int)[] takeablePositions = new (int, int)[moves.Length];
-        int m = 0;
-        int t = 0;
-        foreach ((int, int) pos in moves) {
-            bool placed = false;
-            bool sameColor = false;
-            foreach (IPiece piece in pieces) {
-                if (piece == null || !piece.Alive) {
-                    continue;
-                }
-                if (piece.Position.numPos == pos) {
-                    if (piece.color != turn) {
-                        takeablePositions[t] = pos;
-                        t++;
-                        placed = true;
-                        break;
-                    } else {
-                        sameColor = true;
+    private void findPossibleMoves ((int,int)[] moves)
+    {
+        if (SelectedPiece==null) return;
+        foreach ((int, int) pos in moves)
+        {
+            bool moveTaken = false;
+            foreach (IPiece piece in _pieces) {
+                if (piece.Position.numPos == pos && piece.Alive)
+                {
+                    if (piece.Color == SelectedPiece.Color)
+                    {
+                        moveTaken = true;
                         break;
                     }
+                    _possibleMoves.Add((pos, piece));
+                    moveTaken = true;
+                    break;
                 }
             }
-            if (placed || sameColor) continue;
-            movablePositions[m] = pos;
-            m++;
+
+            if (!moveTaken)
+            {
+                _possibleMoves.Add((pos, null));
+            }
         }
-        return (movablePositions, takeablePositions);
     }  
     public void select(int x, int y) {
         IPiece? selectedPiece = null;
-        foreach (IPiece piece in pieces) {
-            if (piece == null) continue;
-            if (piece.Position.numPos == (x,y)) {
+        foreach (IPiece piece in _pieces) {
+            if (piece.Position.numPos == (x,y) && piece.Alive) {
                 selectedPiece = piece;
                 break;
             }
         }
-        if (selectedPiece == null || selectedPiece.color != turn) return;
+        if (selectedPiece == null || selectedPiece.Color != _turn) return;
 
-        this.selectedPiece = selectedPiece;
+        this.SelectedPiece = selectedPiece;
         
-        (movablePositions, takeablePositions) = findMovableAndTakeablePositions(selectedPiece.allMoves());    
+        findPossibleMoves(SelectedPiece.allMoves());
 
         selectedPiece.Select = !selectedPiece.Select;
     }
     private void unSelectPiece() {
-        if (selectedPiece == null) return;
-        selectedPiece.Select = !selectedPiece.Select;
-        selectedPiece = null;
-        movablePositions = [];
-        takeablePositions = []; 
+        if (SelectedPiece == null) return;
+        SelectedPiece.Select = !SelectedPiece.Select;
+        SelectedPiece = null;
+        resetPossibleMove();
     }
-    private void resetAndSwitch() {
-        switchTurn();
+    private void resetAndSwitch() { switchTurn();
         unSelectPiece();
     }
     public void move(int x, int y) {
-        if (selectedPiece == null) return;
-
-        if (selectedPiece.Position.numPos==(x,y)) {
+        if (SelectedPiece == null) return;
+        
+        if (SelectedPiece.Position.numPos==(x,y)) {
             unSelectPiece();
             return;
         }
-        bool available = false;
-        foreach ((int,int) move in movablePositions) {
-            if (move == (x,y)) {
-                available = true;
+        foreach (((int, int), IPiece?) move in _possibleMoves)
+        {
+            ((int, int) pos, IPiece? piece) = move;
+            if ((x, y) == pos)
+            {
+                if (piece == null)
+                {
+                    Utilities.movePiece(SelectedPiece,x,y);
+                    resetAndSwitch();
+                    return;
+                }
+                else
+                {
+                    Utilities.movePiece(SelectedPiece,x,y);
+                    piece.Alive = false;
+                    resetAndSwitch();
+                    return;
+                }
             }
-        }
-        if (available) {
-            Utilities.movePiece(selectedPiece,x,y);
-            resetAndSwitch();
-            return;
-        }
-        IPiece? takeablePiece = null;
-        foreach ((int,int) move in takeablePositions) {
-            if (move == (x,y)) {
-                takeablePiece = Array.Find(pieces, p=>p.Position.numPos==(x,y));
-            }
-        }
-        if (takeablePiece != null) {
-            Utilities.movePiece(selectedPiece,x,y);
-            takeablePiece.Alive = false;
-            resetAndSwitch();
-            return;
+        } 
+        unSelectPiece(); // if moved piece is not possible
+    }
+
+    private void switchTurn () {
+        switch (_turn) {
+            case playerColor.White: 
+                _turn = playerColor.Black;
+                break;
+            case playerColor.Black:
+                _turn = playerColor.White;
+                break;
         }
     }
 
-    public void switchTurn () {
-        switch (turn) {
-            case playerColor.White:
-                turn = playerColor.Black;
-                break;
-            case playerColor.Black:
-                turn = playerColor.White;
-                break;
-        }
+    private void resetPossibleMove()
+    {
+        _possibleMoves.Clear();
     }
-    
 }
