@@ -47,21 +47,25 @@ public class Bishop : IPiece  {
     }
 
     public (int, int)[,] allMoves() {
-        (int, int)[,] moves = new (int,int)[1,8]; //todo: fix
+        (int, int)[,] moves = new (int,int)[4,7];
         (int x, int y) = Position.numPos;
-        (int, int)[] directions = {
-            (-1, -1), (0, -1), (1, -1),
-            (-1,  0),         (1,  0),
-            (-1,  1), (0,  1), (1,  1),
+        (int,int) [,] directions = new (int,int)[4, 7]
+        {
+            {(-1,-1), (-2,-2), (-3,-3), (-4,-4), (-5,-5), (-6,-6), (-7,-7)}, 
+            {(1,1), (2,2), (3,3), (4,4), (5,5), (6,6), (7,7)}, 
+            {(-1,1), (-2,2), (-3,3), (-4,4), (-5,5), (-6,6), (-7,7)}, 
+            {(1,-1), (2,-2), (3,-3), (4,-4), (5,-5), (6,-6), (7,-7)}, 
         };
-        int c = 0;
-        foreach (var (dx, dy) in directions) {
-            int nx = x + dx, ny = y + dy;
-            if (nx >= 1 && nx <= 8 && ny >= 1 && ny <= 8) {
-                moves[0,c] = (nx,ny);
-                c++;
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 7; j++)
+            {
+                (int dx, int dy) = directions[i, j];
+                int nx = x + dx, ny = y + dy;
+                if (nx >= 1 && nx <= 8 && ny >= 1 && ny <= 8) {
+                    moves[i,j] = (nx,ny);
+                }
             }
-            
         }
         return moves;
     }

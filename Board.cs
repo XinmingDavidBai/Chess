@@ -89,30 +89,35 @@ public class Board {
     private void findPossibleMoves ((int,int)[,] moves)
     {
         if (SelectedPiece==null) return;
-        for (int i = 0; i < moves.GetLength(0); i++)
+        for (int i = 0; i < moves.GetLength(0); i++) // each direction
         {
             bool directionBlocked = false;
-            for (int j = 0; j < moves.GetLength(1); j++) // each direction
+            for (int j = 0; j < moves.GetLength(1); j++) // each move in direction
             {
-                if (directionBlocked) break;
                 (int x, int y) pos = moves[i,j];
+                if (pos == (0,0)) continue; // ignores the empty ones
+                if (directionBlocked) break;    // goes to next direction
                 foreach (IPiece piece in _pieces)
                 {
                     if (piece.Position.numPos == pos && piece.Alive)
                     {
                         directionBlocked = true;
-                        if (piece.Color == SelectedPiece.Color)
+                        if (piece.Color == SelectedPiece.Color ||
+                            (SelectedPiece.Type == PieceType.Pawn && i == 2)) // only pawn diag
                         {
                             break;
                         }
-
                         _possibleMoves.Add((pos, piece));
                         break;
                     }
 
                 }
-
-                if (!directionBlocked)
+                // if there move is on empty cell
+                if ((SelectedPiece.Type == PieceType.Pawn && i is 0 or 1 ))
+                {
+                    continue; // not pawn diag 
+                }
+                if (!directionBlocked) 
                 {
                     _possibleMoves.Add((pos, null));
                 }

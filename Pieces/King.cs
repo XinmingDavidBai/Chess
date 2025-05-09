@@ -46,8 +46,9 @@ public class King : IPiece  {
         } 
     }
 
-    public (int, int)[,] allMoves() {
-        (int, int)[,] moves = new (int,int)[1,8]; //todo: fix
+    public (int, int)[,] allMoves()
+    {
+        (int, int)[,] moves = new (int, int)[8, 1];
         (int x, int y) = Position.numPos;
         (int, int)[] directions = {
             (-1, -1), (0, -1), (1, -1),
@@ -58,7 +59,7 @@ public class King : IPiece  {
         foreach (var (dx, dy) in directions) {
             int nx = x + dx, ny = y + dy;
             if (nx >= 1 && nx <= 8 && ny >= 1 && ny <= 8) {
-                moves[0,c] = (nx,ny);
+                moves[c,0] = (nx,ny);
                 c++;
             }
             

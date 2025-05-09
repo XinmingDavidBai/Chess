@@ -46,18 +46,19 @@ public class Knight : IPiece  {
         } 
     }
     public (int, int)[,] allMoves() {
-        (int, int)[,] moves = new (int,int)[1,8]; //todo: fix
+        (int, int)[,] moves = new (int,int)[8,1]; //todo: fix
         (int x, int y) = Position.numPos;
-        (int, int)[] directions = {
-            (-1, -1), (0, -1), (1, -1),
-            (-1,  0),         (1,  0),
-            (-1,  1), (0,  1), (1,  1),
-        };
+         (int, int)[] directions = {
+                (-1, -2), (1, -2), 
+            (-2, -1),            (2, -1),
+            (-2,  1),            (2,  1),
+                (-1,  2), (1,  2), 
+        };      
         int c = 0;
         foreach (var (dx, dy) in directions) {
             int nx = x + dx, ny = y + dy;
             if (nx >= 1 && nx <= 8 && ny >= 1 && ny <= 8) {
-                moves[0,c] = (nx,ny);
+                moves[c,0] = (nx,ny);
                 c++;
             }
             
