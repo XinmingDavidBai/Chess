@@ -46,7 +46,7 @@ public class Knight : IPiece  {
         } 
     }
     public (int, int)[,] allMoves() {
-        (int, int)[,] moves = new (int,int)[8,1]; //todo: fix
+        (int, int)[,] moves = new (int,int)[8,1];
         (int x, int y) = Position.numPos;
          (int, int)[] directions = {
                 (-1, -2), (1, -2), 
