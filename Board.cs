@@ -15,7 +15,7 @@ public class Board {
     public Board () {
         selectedPiece=null;
         turn = playerColor.White;
-        pieces = new IPiece[16];
+        pieces = new IPiece[32];
         int c = 0;
         for (int i = 0; i < Consts.INITIAL_PIECES_LOCATION.Length; i++) {
             for (int j = 0; j < Consts.INITIAL_PIECES_LOCATION[i].Length; j++) {
@@ -23,6 +23,26 @@ public class Board {
                 switch (Consts.INITIAL_PIECES_LOCATION[i][j]) {
                     case 'k':
                         pieces[c] = new King(col, (ChessPositionTransformer.intToChar(j), i + 1));
+                        c++;
+                        break;
+                    case 'q':
+                        pieces[c] = new Queen(col, (ChessPositionTransformer.intToChar(j), i + 1));
+                        c++;
+                        break;
+                    case 'b':
+                        pieces[c] = new Bishop(col, (ChessPositionTransformer.intToChar(j), i + 1));
+                        c++;
+                        break;
+                    case 'r':
+                        pieces[c] = new Rook(col, (ChessPositionTransformer.intToChar(j), i + 1));
+                        c++;
+                        break;
+                    case 'p':
+                        pieces[c] = new Pawn(col, (ChessPositionTransformer.intToChar(j), i + 1));
+                        c++;
+                        break;
+                    case 'n':
+                        pieces[c] = new Knight(col, (ChessPositionTransformer.intToChar(j), i + 1));
                         c++;
                         break;
                     default:
