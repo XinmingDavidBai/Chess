@@ -58,7 +58,7 @@ public class Knight : IPiece  {
         foreach (var (dx, dy) in directions) {
             int nx = x + dx, ny = y + dy;
             if (nx >= 1 && nx <= 8 && ny >= 1 && ny <= 8) {
-                moves[c,0] = (nx,ny);
+                moves[c,0] = (nx,ny); //test
                 c++;
             }
             
