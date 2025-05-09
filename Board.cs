@@ -86,29 +86,36 @@ public class Board {
         
 
     }
-    private void findPossibleMoves ((int,int)[] moves)
+    private void findPossibleMoves ((int,int)[,] moves)
     {
         if (SelectedPiece==null) return;
-        foreach ((int, int) pos in moves)
+        for (int i = 0; i < moves.GetLength(0); i++)
         {
-            bool moveTaken = false;
-            foreach (IPiece piece in _pieces) {
-                if (piece.Position.numPos == pos && piece.Alive)
+            bool directionBlocked = false;
+            for (int j = 0; j < moves.GetLength(1); j++) // each direction
+            {
+                if (directionBlocked) break;
+                (int x, int y) pos = moves[i,j];
+                foreach (IPiece piece in _pieces)
                 {
-                    if (piece.Color == SelectedPiece.Color)
+                    if (piece.Position.numPos == pos && piece.Alive)
                     {
-                        moveTaken = true;
+                        directionBlocked = true;
+                        if (piece.Color == SelectedPiece.Color)
+                        {
+                            break;
+                        }
+
+                        _possibleMoves.Add((pos, piece));
                         break;
                     }
-                    _possibleMoves.Add((pos, piece));
-                    moveTaken = true;
-                    break;
-                }
-            }
 
-            if (!moveTaken)
-            {
-                _possibleMoves.Add((pos, null));
+                }
+
+                if (!directionBlocked)
+                {
+                    _possibleMoves.Add((pos, null));
+                }
             }
         }
     }  
@@ -134,7 +141,8 @@ public class Board {
         SelectedPiece = null;
         resetPossibleMove();
     }
-    private void resetAndSwitch() { switchTurn();
+    private void resetAndSwitch() { 
+        switchTurn();
         unSelectPiece();
     }
     public void move(int x, int y) {
@@ -151,13 +159,13 @@ public class Board {
             {
                 if (piece == null)
                 {
-                    Utilities.movePiece(SelectedPiece,x,y);
+                    SelectedPiece.setPosition(x,y);
                     resetAndSwitch();
                     return;
                 }
                 else
                 {
-                    Utilities.movePiece(SelectedPiece,x,y);
+                    SelectedPiece.setPosition(x,y);
                     piece.Alive = false;
                     resetAndSwitch();
                     return;

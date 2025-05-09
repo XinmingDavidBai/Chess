@@ -7,8 +7,9 @@ public interface IPiece {
     public string Label { get; internal set; }
     public PieceType Type { get; }
     public int Value { get; }
-    public ChessPosition Position { get; set; }
+    public ChessPosition Position { get; }
+    public void setPosition(int x, int y);
     public void draw();
-    public (int,int)[] allMoves();
+    public (int,int)[,] allMoves();
     
 }

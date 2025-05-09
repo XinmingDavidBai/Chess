@@ -27,8 +27,11 @@ public class Rook : IPiece  {
 
     public PieceType Type { get; } = PieceType.Rook;
     public int Value { get; } = 5;
-    public ChessPosition Position { get; set; }
-
+    public ChessPosition Position { get; private set; }
+    public void setPosition(int x, int y)
+    {
+        Position = new ChessPosition(ChessPositionTransformer.intToChar(x - 1), y);
+    } 
     public playerColor Color { get; }
     public string Label { get; set; }
 
@@ -43,20 +46,19 @@ public class Rook : IPiece  {
         } 
     }
 
-    public (int, int)[] allMoves() {
-        if (!Alive) return [];
-        (int, int)[] moves = new (int,int)[64];
+    public (int, int)[,] allMoves() {
+        (int, int)[,] moves = new (int,int)[1,8]; //todo: fix
         (int x, int y) = Position.numPos;
         (int, int)[] directions = {
-                    (-1, -1), (0, -1), (1, -1),
-                    (-1,  0),         (1,  0),
-                    (-1,  1), (0,  1), (1,  1),
+            (-1, -1), (0, -1), (1, -1),
+            (-1,  0),         (1,  0),
+            (-1,  1), (0,  1), (1,  1),
         };
         int c = 0;
         foreach (var (dx, dy) in directions) {
             int nx = x + dx, ny = y + dy;
             if (nx >= 1 && nx <= 8 && ny >= 1 && ny <= 8) {
-                moves[c] = (nx,ny);
+                moves[0,c] = (nx,ny);
                 c++;
             }
             
