@@ -2,13 +2,8 @@ using Raylib_cs;
 
 namespace Chess;
 
-internal class Game {
-    private readonly string name;
-
-    public Game(string name) {
-        this.name = name;
-    }
-
+internal class Game(string name)
+{
     public void Run() {
         Raylib.InitWindow(800, 800, name);
         var board = new Board();
